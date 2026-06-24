@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Azure App Container by Fritz Ramos</title>
+  <!-- Modern clean typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Decorative background elements -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <main class="container">
+    <div class="card" id="main-card">
+      <div class="azure-logo">
+        <!-- Modern minimalist representation of Azure logo -->
+        <svg viewBox="0 0 100 100" class="azure-svg">
+          <polygon points="50,10 85,75 55,75" fill="#0078d4" />
+          <polygon points="50,10 15,75 55,75" fill="#50e6ff" />
+        </svg>
+      </div>
+
+      <h1 class="title" id="welcome-title">Welcome to Azure App Container by Fritz Ramos</h1>
+      <p class="subtitle" id="version-subtitle">This is the latest version of the app</p>
+      
+      <div class="divider"></div>
+
+      <div class="status-container">
+        <div class="status-row">
+          <span class="status-label">Frontend Platform</span>
+          <span class="status-badge platform-badge">Azure Container App</span>
+        </div>
+        
+        <div class="status-row">
+          <span class="status-label">Backend Status</span>
+          <span class="status-badge status-loading" id="backend-status">
+            <span class="pulse-dot"></span>
+            Checking Connection
+          </span>
+        </div>
+      </div>
+
+      <div class="footer">
+        <p>Continuous Deployment via <span class="highlight">GitHub Actions</span> &bull; Infrastructure by <span class="highlight">Terraform</span></p>
+      </div>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

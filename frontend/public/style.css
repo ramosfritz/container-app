@@ -1,0 +1,283 @@
+/* Modern Global Reset & Variables */
+:root {
+  --bg-dark: #0b0f19;
+  --bg-gradient: radial-gradient(circle at 50% 50%, #151d30 0%, #080b12 100%);
+  --azure-blue: #0078d4;
+  --azure-light: #50e6ff;
+  --status-green: #10b981;
+  --status-red: #ef4444;
+  --text-primary: #ffffff;
+  --text-secondary: #a3aed0;
+  --glass-bg: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.08);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg-dark);
+  background-image: var(--bg-gradient);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Ambient Floating Blobs */
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  z-index: 1;
+  opacity: 0.35;
+  animation: float 20s infinite alternate ease-in-out;
+}
+
+.blob-1 {
+  width: 400px;
+  height: 400px;
+  background: var(--azure-blue);
+  top: -10%;
+  left: 10%;
+}
+
+.blob-2 {
+  width: 500px;
+  height: 500px;
+  background: #6366f1; /* Indigo */
+  bottom: -15%;
+  right: 10%;
+  animation-delay: -5s;
+}
+
+.blob-3 {
+  width: 300px;
+  height: 300px;
+  background: #8b5cf6; /* Purple */
+  top: 40%;
+  right: 25%;
+  animation-delay: -10s;
+}
+
+@keyframes float {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(50px, -30px) scale(1.1);
+  }
+  100% {
+    transform: translate(-30px, 40px) scale(0.9);
+  }
+}
+
+/* Glassmorphic Container Card */
+.container {
+  width: 90%;
+  max-width: 750px;
+  z-index: 10;
+  padding: 20px;
+}
+
+.card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid var(--glass-border);
+  border-radius: 28px;
+  padding: 50px 40px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 30px 90px rgba(0, 72, 166, 0.2);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Logo Representation */
+.azure-logo {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 30px auto;
+  filter: drop-shadow(0 4px 12px rgba(0, 120, 212, 0.4));
+}
+
+.azure-svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Typography (Larger & Prominent) */
+.title {
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #ffffff 0%, #dbeafe 60%, #93c5fd 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 18px;
+}
+
+.subtitle {
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  margin-bottom: 35px;
+}
+
+/* Divider Line */
+.divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.12) 50%, rgba(255, 255, 255, 0) 100%);
+  margin-bottom: 35px;
+}
+
+/* Status Cards & Alignment */
+.status-container {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 40px;
+}
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 16px 24px;
+  border-radius: 16px;
+  transition: background 0.3s ease;
+}
+
+.status-row:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.status-label {
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* Badge Styles */
+.status-badge {
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 8px 20px;
+  border-radius: 100px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.platform-badge {
+  background: rgba(0, 120, 212, 0.15);
+  color: #93c5fd;
+  border: 1px solid rgba(0, 120, 212, 0.25);
+}
+
+/* Status: Loading / Checking */
+.status-loading {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pulse-dot {
+  width: 10px;
+  height: 10px;
+  background: var(--text-secondary);
+  border-radius: 50%;
+  animation: pulse-gray 1.5s infinite;
+}
+
+/* Status: OK / Connected (Green) */
+.status-ok {
+  background: rgba(16, 185, 129, 0.12);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+}
+
+.status-ok .pulse-dot {
+  background: var(--status-green);
+  animation: pulse-green 1.5s infinite;
+}
+
+/* Status: Error / Disconnected (Red) */
+.status-error {
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+}
+
+.status-error .pulse-dot {
+  background: var(--status-red);
+  animation: pulse-red 1.5s infinite;
+}
+
+/* Keyframes for Glowing Pulsing Dots */
+@keyframes pulse-gray {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(163, 174, 208, 0.5); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(163, 174, 208, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(163, 174, 208, 0); }
+}
+
+@keyframes pulse-green {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+  70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+@keyframes pulse-red {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); }
+  70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+/* Footer details */
+.footer {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+.highlight {
+  color: #93c5fd;
+  font-weight: 500;
+}
+
+/* Responsive adjustment */
+@media (max-width: 600px) {
+  .card {
+    padding: 30px 20px;
+  }
+  .title {
+    font-size: 2.1rem;
+  }
+  .subtitle {
+    font-size: 1.2rem;
+    margin-bottom: 25px;
+  }
+  .status-row {
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+  }
+}
