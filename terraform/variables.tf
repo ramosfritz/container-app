@@ -7,7 +7,7 @@ variable "resource_group_name" {
 variable "location" {
   type        = string
   description = "Azure region where resources will be created"
-  default     = "eastus"
+  default     = "eastus" # Keep Resource Group in eastus to avoid deletion block
 }
 
 variable "acr_name" {
@@ -19,7 +19,7 @@ variable "acr_name" {
 variable "environment_name" {
   type        = string
   description = "Name of the Container Apps Environment"
-  default     = "aca-env-fritz-ramos"
+  default     = "aca-env-fritz-ramos-west"
 }
 
 variable "backend_image_tag" {
