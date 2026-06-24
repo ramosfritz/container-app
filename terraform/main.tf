@@ -3,7 +3,7 @@ resource "azurerm_resource_group" "rg" {
   location = var.location
 }
 
-# Azure Container Registry to host our docker images
+# Azure Container Registry to host our docker images (remains in eastus)
 resource "azurerm_container_registry" "acr" {
   name                = var.acr_name
   resource_group_name = azurerm_resource_group.rg.name
@@ -12,19 +12,19 @@ resource "azurerm_container_registry" "acr" {
   admin_enabled       = true
 }
 
-# Log Analytics Workspace for Container App logs
+# Log Analytics Workspace for Container App logs (deployed to westus, unique name to bypass soft-delete conflict)
 resource "azurerm_log_analytics_workspace" "law" {
-  name                = "law-fritz-ramos"
-  location            = azurerm_resource_group.rg.location
+  name                = "law-fritz-ramos-west"
+  location            = "westus"
   resource_group_name = azurerm_resource_group.rg.name
   sku                 = "PerGB2018"
   retention_in_days   = 30
 }
 
-# Container Apps Environment
+# Container Apps Environment (deployed to westus, unique name to bypass eastus collision)
 resource "azurerm_container_app_environment" "env" {
-  name                       = var.environment_name
-  location                   = azurerm_resource_group.rg.location
+  name                       = "aca-env-fritz-ramos-west" # Renamed to bypass conflict
+  location                   = "westus"
   resource_group_name        = azurerm_resource_group.rg.name
   log_analytics_workspace_id = azurerm_log_analytics_workspace.law.id
 }
