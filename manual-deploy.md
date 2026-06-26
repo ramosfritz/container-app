@@ -231,6 +231,55 @@ Use this method if you have Docker Desktop running locally and want to build the
 
 ---
 
+## 🔄 How to Redeploy Updates & Code Edits (Manual)
+
+If you modify the frontend website files, the backend code, or styles, you must rebuild the Docker images, push them to your registry, and tell Azure Container Apps to update and pull the new container.
+
+### Step 1: Rebuild and Push the Updated Image
+Choose either option based on your environment:
+
+#### Option A: Using Azure CLI Cloud Build (No Local Docker)
+Run this from the project root (replace `frontend` with `backend` if you updated the API):
+```bash
+az acr build --registry acrfritzramoscontainerapp --image frontend:latest ./frontend
+```
+
+#### Option B: Using Local Docker CLI
+Run these from the project root:
+```bash
+# Rebuild image locally
+docker build -t acrfritzramoscontainerapp.azurecr.io/frontend:latest ./frontend
+
+# Push updated image to ACR
+docker push acrfritzramoscontainerapp.azurecr.io/frontend:latest
+```
+
+---
+
+### Step 2: Trigger the Redeployment in Azure
+Simply pushing the image to ACR does not automatically notify Container Apps to deploy it. You must trigger a new revision deployment using one of the methods below:
+
+#### Method 1: Using the Azure CLI (Fastest)
+Run this command to force the Container App to pull the new image and roll out a new revision:
+```bash
+az containerapp update \
+  --name frontend-app \
+  --resource-group rg-fritz-ramos-container-app \
+  --image acrfritzramoscontainerapp.azurecr.io/frontend:latest
+```
+*(If you updated the backend instead, replace `frontend-app` and the image name with `backend-app` and `backend:latest` respectively).*
+
+#### Method 2: Using the Azure Portal GUI (Point and Click)
+1. In the portal, navigate to **Container Apps** and select your app (e.g. `frontend-app`).
+2. In the left menu under **Application**, click on **Containers**.
+3. Click the **Edit and deploy** button in the top menu.
+4. Click on the container row (e.g. `frontend`) and click **Edit**.
+5. In the flyout panel, verify that the image tag is set to `latest`, and click **Save**.
+6. Click the **Create** button at the bottom of the screen.
+*This creates a new revision, which forces Azure to contact your Container Registry, pull the newly uploaded container image, and route traffic to the updated container.*
+
+---
+
 ## 🧹 Tearing Down (Clean up to avoid charges)
 
 ### If Deployed via Terraform:
