@@ -120,13 +120,47 @@ If you prefer to deploy manually using the **Azure Portal graphical interface**,
 
 ---
 
-### Part 3: Build & Push Images
-> [!NOTE]
-> The Azure Portal GUI does not compile raw code files into Docker images. You must push the images once using the Azure CLI from your local project root:
-> ```bash
-> az acr build --registry acrfritzramoscontainerapp --image backend:latest ./backend
-> az acr build --registry acrfritzramoscontainerapp --image frontend:latest ./frontend
-> ```
+### Part 3: Build & Push Images (ACR Build vs. Local Docker Build)
+
+Because the Azure Portal GUI does not compile raw code files into Docker images, you must build and push the images once from your local machine before deploying the Container Apps.
+
+Choose **one** of the two methods below to build and upload your images:
+
+#### Option A: Build in the Cloud using Azure CLI (No Local Docker Required)
+This is the easiest method if you do not have Docker Desktop running on your machine.
+Run these commands from your local project root:
+```bash
+# Build and push the Backend
+az acr build --registry acrfritzramoscontainerapp --image backend:latest ./backend
+
+# Build and push the Frontend
+az acr build --registry acrfritzramoscontainerapp --image frontend:latest ./frontend
+```
+
+#### Option B: Build Locally using Docker CLI (Requires Docker Desktop Running)
+Use this method if you have Docker Desktop running locally and want to build the containers on your machine:
+
+1. **Log in to your Azure Container Registry via Docker**:
+   ```bash
+   az acr login --name acrfritzramoscontainerapp
+   ```
+2. **Build and Tag the Images Locally**:
+   Run these commands from your local project root:
+   ```bash
+   # Build & Tag Backend
+   docker build -t acrfritzramoscontainerapp.azurecr.io/backend:latest ./backend
+
+   # Build & Tag Frontend
+   docker build -t acrfritzramoscontainerapp.azurecr.io/frontend:latest ./frontend
+   ```
+3. **Push the Images to your Azure Container Registry**:
+   ```bash
+   # Push Backend
+   docker push acrfritzramoscontainerapp.azurecr.io/backend:latest
+
+   # Push Frontend
+   docker push acrfritzramoscontainerapp.azurecr.io/frontend:latest
+   ```
 
 ---
 
