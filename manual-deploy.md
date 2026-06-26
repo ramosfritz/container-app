@@ -88,9 +88,126 @@ frontend_url = "https://frontend-app.wonderfulcliff-af8321cd.westus.azurecontain
 
 ---
 
+## 🖱️ Point-and-Click Azure Portal GUI Instructions (Alternative)
+
+If you prefer to deploy manually using the **Azure Portal graphical interface**, follow these step-by-step instructions.
+
+### Part 1: Create a Resource Group
+1. Sign in to the [Azure Portal](https://portal.azure.com).
+2. Search for **Resource groups** in the top search bar and click it.
+3. Click **+ Create**.
+4. Configure the details:
+   - **Subscription**: Select your active subscription (e.g., `PAYG-Basic`).
+   - **Resource group**: Enter `rg-fritz-ramos-container-app`.
+   - **Region**: Select `East US` (or your preferred registry location).
+5. Click **Review + create**, then click **Create**.
+
+---
+
+### Part 2: Create Azure Container Registry (ACR)
+1. Search for **Container registries** in the search bar and click it.
+2. Click **+ Create**.
+3. Configure the details:
+   - **Resource group**: Select `rg-fritz-ramos-container-app`.
+   - **Registry name**: Enter `acrfritzramoscontainerapp` (must be unique).
+   - **Location**: Select `West US` (or matching your preferred app region).
+   - **SKU**: Select `Basic`.
+4. Click **Review + create**, then click **Create**.
+5. **Enable Admin Access**:
+   - Once the registry is created, navigate to it in the portal.
+   - In the left menu under **Settings**, click **Access keys**.
+   - Check the **Enabled** box for the **Admin user** field (this exposes the username and password that the Container Apps will use to pull images).
+
+---
+
+### Part 3: Build & Push Images
+> [!NOTE]
+> The Azure Portal GUI does not compile raw code files into Docker images. You must push the images once using the Azure CLI from your local project root:
+> ```bash
+> az acr build --registry acrfritzramoscontainerapp --image backend:latest ./backend
+> az acr build --registry acrfritzramoscontainerapp --image frontend:latest ./frontend
+> ```
+
+---
+
+### Part 4: Create a Log Analytics Workspace
+1. Search for **Log Analytics workspaces** in the top search bar and click it.
+2. Click **+ Create**.
+3. Configure the details:
+   - **Resource group**: Select `rg-fritz-ramos-container-app`.
+   - **Name**: Enter `law-fritz-ramos-west`.
+   - **Region**: Select `West US`.
+4. Click **Review + create**, then click **Create**.
+
+---
+
+### Part 5: Deploy the Backend Container App
+1. Search for **Container Apps** in the top search bar and click it.
+2. Click **+ Create**.
+3. Configure the **Basics** tab:
+   - **Resource group**: Select `rg-fritz-ramos-container-app`.
+   - **Container app name**: Enter `backend-app`.
+   - **Region**: Select `West US`.
+   - **Container Apps Environment**: Click **Create new**.
+     - **Environment name**: Enter `aca-env-fritz-ramos-west`.
+     - Go to the **Monitoring** tab, and select `law-fritz-ramos-west` as the Log Analytics workspace.
+     - Click **Create** to save the environment.
+4. Click **Next: Container >** and configure the container settings:
+   - Uncheck **Use quickstart image**.
+   - **Name**: `backend`.
+   - **Image source**: Select `Azure Container Registry`.
+   - **Registry**: Select `acrfritzramoscontainerapp`.
+   - **Image**: Select `backend`.
+   - **Image tag**: Select `latest`.
+   - **CPU and Memory**: Select `0.25 CPU cores, 0.5 Gi memory`.
+5. Click **Next: Ingress >** and configure network ingress:
+   - **Ingress**: Check **Enabled**.
+   - **Target port**: Enter `5000`.
+   - **Ingress traffic**: Select **Limited to Container Apps Environment** (Internal ingress for security).
+6. Click **Review + create**, then click **Create**.
+7. **Copy FQDN**: Once deployed, go to the resource and copy the **FQDN** URL (e.g. `https://backend-app.internal...`). We need this for the frontend configuration.
+
+---
+
+### Part 6: Deploy the Frontend Container App
+1. Search for **Container Apps** in the top search bar and click it.
+2. Click **+ Create**.
+3. Configure the **Basics** tab:
+   - **Resource group**: Select `rg-fritz-ramos-container-app`.
+   - **Container app name**: Enter `frontend-app`.
+   - **Region**: Select `West US`.
+   - **Container Apps Environment**: Select the existing `aca-env-fritz-ramos-west`.
+4. Click **Next: Container >** and configure the container settings:
+   - Uncheck **Use quickstart image**.
+   - **Name**: `frontend`.
+   - **Image source**: Select `Azure Container Registry`.
+   - **Registry**: Select `acrfritzramoscontainerapp`.
+   - **Image**: Select `frontend`.
+   - **Image tag**: Select `latest`.
+   - **CPU and Memory**: Select `0.25 CPU cores, 0.5 Gi memory`.
+   - **Environment variables**: Add the following:
+     - Name: `PORT` | Value: `3000`
+     - Name: `BACKEND_URL` | Value: Paste the Backend FQDN you copied (e.g. `https://backend-app.internal...`)
+5. Click **Next: Ingress >** and configure network ingress:
+   - **Ingress**: Check **Enabled**.
+   - **Target port**: Enter `3000`.
+   - **Ingress traffic**: Select **Accepting traffic from anywhere** (External ingress).
+6. Click **Review + create**, then click **Create**.
+7. **Open App**: Once deployed, navigate to the frontend app resource and click the **Application Url** at the top right to open the live site!
+
+---
+
 ## 🧹 Tearing Down (Clean up to avoid charges)
-To destroy all provisioned resources and stop any Azure charges, run this command from the `terraform` folder:
+
+### If Deployed via Terraform:
+Run this command from the `terraform` folder:
 ```bash
 terraform destroy -auto-approve
 ```
-*This command will cleanly remove the Resource Group, Registry, Log Analytics Workspace, Environment, and both apps.*
+
+### If Deployed via Azure Portal (Point and Click):
+1. Navigate to **Resource groups** in the portal.
+2. Select `rg-fritz-ramos-container-app`.
+3. Click **Delete resource group** in the top menu.
+4. Type the name of the resource group to confirm, and click **Delete**.
+*This will automatically remove all services, databases, registries, and environments inside it, stopping any Azure charges.*
