@@ -299,32 +299,20 @@ docker push acrfritzramoscontainerapp.azurecr.io/frontend:latest
 
 ---
 
-### Step 4: Create the Container App Environment in Azure Portal
-1. Sign in to the [Azure Portal](https://portal.azure.com).
-2. In the top search bar, search for **Container Apps Environments** and select it.
-3. Click **+ Create**.
-4. Configure the environment details:
-   - **Subscription**: Select your active subscription.
-   - **Resource group**: Select `rg-fritz-ramos-container-app` (or click **Create new** if it does not exist).
-   - **Environment name**: Enter `aca-env-fritz-ramos-west`.
-   - **Region**: Select `West US` (or your preferred region).
-   - **Monitoring**: Under the *Monitoring* tab, select or create a Log Analytics workspace (e.g., `law-fritz-ramos-west`).
-5. Click **Review + create**, then click **Create**.
+### Step 4: Deploy the Backend Container App (and Create the Environment)
+To create the Container Apps Environment, we will create the Backend Container App first. The Azure Portal lets you create the Environment directly from the Container App creation wizard.
 
----
-
-### Step 5: Deploy the Apps as Container Apps in Azure Portal
-Once the environment is successfully provisioned, deploy the containerized backend and frontend.
-
-#### 1. Deploy the Backend Container App
-1. Search for **Container Apps** in the search bar and click it.
+1. Search for **Container Apps** in the top search bar and click it.
 2. Click **+ Create**.
 3. Configure the **Basics** tab:
    - **Resource group**: Select `rg-fritz-ramos-container-app`.
    - **Container app name**: Enter `backend-app`.
-   - **Region**: Select `West US` (matching your environment).
-   - **Container Apps Environment**: Select `aca-env-fritz-ramos-west`.
-4. Configure the **Container** tab:
+   - **Region**: Select `West US` (or matching your preferred region).
+   - **Container Apps Environment**: Click **Create new**.
+     - **Environment name**: Enter `aca-env-fritz-ramos-west`.
+     - Go to the **Monitoring** tab, and select `law-fritz-ramos-west` as the Log Analytics workspace (or click Create new for the workspace if it does not exist).
+     - Click **Create** to save the environment.
+4. Click **Next: Container >** and configure the container settings:
    - Uncheck **Use quickstart image**.
    - **Name**: `backend`.
    - **Image source**: Select **Azure Container Registry**.
@@ -332,21 +320,23 @@ Once the environment is successfully provisioned, deploy the containerized backe
    - **Image**: Select `backend`.
    - **Image tag**: Select `latest`.
    - **CPU and Memory**: Select `0.25 CPU cores, 0.5 Gi memory`.
-5. Configure the **Ingress** tab:
-   - Check **Enabled**.
+5. Click **Next: Ingress >** and configure network ingress:
+   - **Ingress**: Check **Enabled**.
    - **Target port**: Enter `5000`.
    - **Ingress traffic**: Select **Limited to Container Apps Environment** (Internal ingress for backend security).
 6. Click **Review + create**, then click **Create**.
 7. Once deployed, navigate to the backend container app resource and copy its internal **FQDN** (e.g., `https://backend-app.internal.wonderfulcliff-af8321cd.westus.azurecontainerapps.io`).
 
-#### 2. Deploy the Frontend Container App
+---
+
+### Step 5: Deploy the Frontend Container App
 1. Go back to **Container Apps** in the Azure Portal and click **+ Create**.
 2. Configure the **Basics** tab:
    - **Resource group**: Select `rg-fritz-ramos-container-app`.
    - **Container app name**: Enter `frontend-app`.
    - **Region**: Select `West US`.
-   - **Container Apps Environment**: Select `aca-env-fritz-ramos-west`.
-3. Configure the **Container** tab:
+   - **Container Apps Environment**: Select the existing `aca-env-fritz-ramos-west` that you created in the step above.
+3. Click **Next: Container >** and configure the container settings:
    - Uncheck **Use quickstart image**.
    - **Name**: `frontend`.
    - **Image source**: Select **Azure Container Registry**.
@@ -356,8 +346,8 @@ Once the environment is successfully provisioned, deploy the containerized backe
    - **Environment variables**: Add the following:
      - Name: `PORT` | Value: `3000`
      - Name: `BACKEND_URL` | Value: *[Paste the Backend FQDN you copied in the step above]*
-4. Configure the **Ingress** tab:
-   - Check **Enabled**.
+4. Click **Next: Ingress >** and configure network ingress:
+   - **Ingress**: Check **Enabled**.
    - **Target port**: Enter `3000`.
    - **Ingress traffic**: Select **Accepting traffic from anywhere** (External ingress).
 5. Click **Review + create**, then click **Create**.
