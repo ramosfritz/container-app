@@ -26,7 +26,7 @@ az account show --output table
 ```
 *If you have multiple subscriptions, set the active subscription:*
 ```bash
-az account set --subscription "<YOUR_SUBSCRIPTION_ID>"
+az account set --subscription "312af5ea-e2a5-4232-8674-703521f18a74"
 ```
 
 ---
@@ -228,6 +228,140 @@ Use this method if you have Docker Desktop running locally and want to build the
    - **Ingress traffic**: Select **Accepting traffic from anywhere** (External ingress).
 6. Click **Review + create**, then click **Create**.
 7. **Open App**: Once deployed, navigate to the frontend app resource and click the **Application Url** at the top right to open the live site!
+
+---
+
+## 🐳 Hybrid Deployment: Docker Terminal + Azure Portal GUI (Alternative)
+
+This hybrid deployment method is ideal if you want to build and tag the Docker containers locally in your terminal, upload them to Azure Container Registry (ACR), and then use the graphical Azure Portal interface to configure the environment and deploy the Container Apps.
+
+> [!NOTE]
+> Ensure you have **Docker Desktop** running on your local machine before starting.
+
+### Step 1: Create the Resource Group and Azure Container Registry (ACR) in the Azure Portal
+
+Before you can log in, build, or upload your Docker containers, you must create a Resource Group and an Azure Container Registry (ACR) inside the Azure Portal.
+
+#### 1. Create a Resource Group:
+1. Sign in to the [Azure Portal](https://portal.azure.com).
+2. Search for **Resource groups** in the top search bar and click it.
+3. Click **+ Create**.
+4. Configure the details:
+   - **Subscription**: Select your active subscription (e.g., `PAYG-Basic`).
+   - **Resource group**: Enter `rg-fritz-ramos-container-app`.
+   - **Region**: Select `East US` (or your preferred registry location).
+5. Click **Review + create**, then click **Create**.
+
+#### 2. Create the Azure Container Registry (ACR):
+1. Search for **Container registries** in the search bar and click it.
+2. Click **+ Create**.
+3. Configure the details:
+   - **Resource group**: Select `rg-fritz-ramos-container-app`.
+   - **Registry name**: Enter `acrfritzramoscontainerapp` (must be unique).
+   - **Location**: Select `West US` (or matching your preferred app region).
+   - **SKU**: Select `Basic`.
+4. Click **Review + create**, then click **Create**.
+5. **Enable Admin Access (Required)**:
+   - Once the registry is created, navigate to the registry resource in the portal.
+   - In the left menu under **Settings**, click **Access keys**.
+   - Check the **Enabled** box for the **Admin user** field (this allows your Container Apps to log in and pull images).
+
+---
+
+### Step 2: Build the Docker Images Locally
+Open your terminal at the root directory of the project (`c:\Users\DELL\Documents\Container-App`) and execute these commands:
+
+1. **Log in to your Azure Container Registry**:
+   ```bash
+   az acr login --name acrfritzramoscontainerapp
+   ```
+2. **Build and Tag the Backend Image**:
+   ```bash
+   docker build -t acrfritzramoscontainerapp.azurecr.io/backend:latest ./backend
+   ```
+3. **Build and Tag the Frontend Image**:
+   ```bash
+   docker build -t acrfritzramoscontainerapp.azurecr.io/frontend:latest ./frontend
+   ```
+
+---
+
+### Step 3: Upload (Push) the Images to ACR
+Push the locally built images from your machine to your Azure Container Registry:
+
+```bash
+# Upload Backend Image
+docker push acrfritzramoscontainerapp.azurecr.io/backend:latest
+
+# Upload Frontend Image
+docker push acrfritzramoscontainerapp.azurecr.io/frontend:latest
+```
+
+---
+
+### Step 4: Create the Container App Environment in Azure Portal
+1. Sign in to the [Azure Portal](https://portal.azure.com).
+2. In the top search bar, search for **Container Apps Environments** and select it.
+3. Click **+ Create**.
+4. Configure the environment details:
+   - **Subscription**: Select your active subscription.
+   - **Resource group**: Select `rg-fritz-ramos-container-app` (or click **Create new** if it does not exist).
+   - **Environment name**: Enter `aca-env-fritz-ramos-west`.
+   - **Region**: Select `West US` (or your preferred region).
+   - **Monitoring**: Under the *Monitoring* tab, select or create a Log Analytics workspace (e.g., `law-fritz-ramos-west`).
+5. Click **Review + create**, then click **Create**.
+
+---
+
+### Step 5: Deploy the Apps as Container Apps in Azure Portal
+Once the environment is successfully provisioned, deploy the containerized backend and frontend.
+
+#### 1. Deploy the Backend Container App
+1. Search for **Container Apps** in the search bar and click it.
+2. Click **+ Create**.
+3. Configure the **Basics** tab:
+   - **Resource group**: Select `rg-fritz-ramos-container-app`.
+   - **Container app name**: Enter `backend-app`.
+   - **Region**: Select `West US` (matching your environment).
+   - **Container Apps Environment**: Select `aca-env-fritz-ramos-west`.
+4. Configure the **Container** tab:
+   - Uncheck **Use quickstart image**.
+   - **Name**: `backend`.
+   - **Image source**: Select **Azure Container Registry**.
+   - **Registry**: Select `acrfritzramoscontainerapp`.
+   - **Image**: Select `backend`.
+   - **Image tag**: Select `latest`.
+   - **CPU and Memory**: Select `0.25 CPU cores, 0.5 Gi memory`.
+5. Configure the **Ingress** tab:
+   - Check **Enabled**.
+   - **Target port**: Enter `5000`.
+   - **Ingress traffic**: Select **Limited to Container Apps Environment** (Internal ingress for backend security).
+6. Click **Review + create**, then click **Create**.
+7. Once deployed, navigate to the backend container app resource and copy its internal **FQDN** (e.g., `https://backend-app.internal.wonderfulcliff-af8321cd.westus.azurecontainerapps.io`).
+
+#### 2. Deploy the Frontend Container App
+1. Go back to **Container Apps** in the Azure Portal and click **+ Create**.
+2. Configure the **Basics** tab:
+   - **Resource group**: Select `rg-fritz-ramos-container-app`.
+   - **Container app name**: Enter `frontend-app`.
+   - **Region**: Select `West US`.
+   - **Container Apps Environment**: Select `aca-env-fritz-ramos-west`.
+3. Configure the **Container** tab:
+   - Uncheck **Use quickstart image**.
+   - **Name**: `frontend`.
+   - **Image source**: Select **Azure Container Registry**.
+   - **Registry**: Select `acrfritzramoscontainerapp`.
+   - **Image**: Select `frontend`.
+   - **Image tag**: Select `latest`.
+   - **Environment variables**: Add the following:
+     - Name: `PORT` | Value: `3000`
+     - Name: `BACKEND_URL` | Value: *[Paste the Backend FQDN you copied in the step above]*
+4. Configure the **Ingress** tab:
+   - Check **Enabled**.
+   - **Target port**: Enter `3000`.
+   - **Ingress traffic**: Select **Accepting traffic from anywhere** (External ingress).
+5. Click **Review + create**, then click **Create**.
+6. Once deployed, navigate to the frontend container app resource and click the **Application Url** to open the live application!
 
 ---
 
