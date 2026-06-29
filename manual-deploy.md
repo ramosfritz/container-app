@@ -404,6 +404,78 @@ az containerapp update \
 
 ---
 
+## ⏪ How to Roll Back to a Previous Revision (Troubleshooting)
+
+If a new deployment contains bugs, crashes, or is otherwise broken, you can roll back your Container App to a previously working version. The exact steps depend on your app's **Revision Mode** (Single vs. Multiple).
+
+---
+
+### Case A: If your app is in Single Revision Mode (Default)
+In Single revision mode, updating your Container App automatically creates a new revision, routes 100% of traffic to it, and deactivates the older one.
+
+#### Method 1: Re-deploy the older working Docker image (Recommended)
+The most reliable way to roll back is to re-deploy the older working image tag:
+```bash
+# Redeploy Backend to older version (e.g. backend:v1.0 or backend:latest if you reverted the registry tag)
+az containerapp update \
+  --name backend-app \
+  --resource-group rg-fritz-ramos-container-app \
+  --image acrfritzramoscontainerapp.azurecr.io/backend:<working-tag>
+
+# Redeploy Frontend to older version
+az containerapp update \
+  --name frontend-app \
+  --resource-group rg-fritz-ramos-container-app \
+  --image acrfritzramoscontainerapp.azurecr.io/frontend:<working-tag>
+```
+
+#### Method 2: Switch to Multiple Revision Mode to reactivate an old revision
+To reactivate a previous revision directly without building/pushing another image:
+1. Navigate to your Container App (e.g., `frontend-app`) in the **Azure Portal**.
+2. In the left menu under **Application**, click on **Revision management**.
+3. At the top of the screen, click **Choose revision mode** and select **Multiple** (this allows more than one revision to exist and be active). Click **Save**.
+4. In the list of revisions below, locate the last working revision (you can identify it by its creation timestamp).
+5. Click on that revision, and in the right pane or toolbar, check/ensure that it is **Active**.
+6. Set the traffic splitting percentage:
+   - For your **working revision**: Enter `100` (%)
+   - For the **broken revision**: Enter `0` (%)
+7. Click **Save** to route all user traffic back to the stable version.
+
+---
+
+### Case B: If your app is in Multiple Revision Mode
+If you already have Multiple revision mode enabled, you can route traffic to your older stable revision instantly.
+
+#### Method 1: Using the Azure CLI (Fastest)
+1. **List all revisions** of your app to find the name of the working revision:
+   ```bash
+   az containerapp revision list \
+     --name frontend-app \
+     --resource-group rg-fritz-ramos-container-app \
+     --output table
+   ```
+   *Copy the revision name (e.g., `frontend-app--r1a2b3c`) of the working revision.*
+
+2. **Shift 100% of traffic** to the working revision:
+   ```bash
+   az containerapp ingress traffic set \
+     --name frontend-app \
+     --resource-group rg-fritz-ramos-container-app \
+     --traffic <WORKING_REVISION_NAME>=100
+   ```
+   *(Replace `<WORKING_REVISION_NAME>` with the revision name you copied).*
+
+#### Method 2: Using the Azure Portal GUI
+1. Navigate to your Container App in the **Azure Portal**.
+2. In the left menu under **Application**, click on **Revision management**.
+3. Under the **Traffic allocation** or **Revisions** table, find the row of the working revision.
+4. Update the **Traffic %** column:
+   - Set the working revision to `100`.
+   - Set the broken revision to `0`.
+5. Click **Save** at the top. The traffic will instantly cut over to the working revision.
+
+---
+
 ## 🧹 Tearing Down (Clean up to avoid charges)
 
 ### If Deployed via Terraform:
